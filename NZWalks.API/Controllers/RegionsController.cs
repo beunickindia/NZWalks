@@ -99,18 +99,28 @@ namespace NZWalks.API.Controllers
 
         [HttpPost]
         public IActionResult Create([FromBody] AddRegionRequestDto addRegionRequestDto)
-        { 
+        {
             //Map or Convert DTO to domain Model
-            var regionDomainModel=new Region
+            var regionDomainModel = new Region
             {
-                Code=addRegionRequestDto.Code,
-                Name=addRegionRequestDto.Name,
-                RegionNameUrl=addRegionRequestDto.RegionNameUrl
-            }
+                Code = addRegionRequestDto.Code,
+                Name = addRegionRequestDto.Name,
+                RegionNameUrl = addRegionRequestDto.RegionNameUrl
+            };
 
             //Use Domain Model to Create Region
             dbContext.Regions.Add(regionDomainModel);
+            dbContext.SaveChanges();
 
+            //map model back to DTO
+            var regionDto = new RegionDTO
+            {
+                Id=regionDomainModel.Id,
+                Code= regionDomainModel.Code,
+                Name=regionDomainModel.Name,
+                RegionNameUrl=regionDomainModel.RegionNameUrl
+            };
+            return CreatedAtAction(nameof(GetById), new {id= regionDto.Id},regionDto);
         }
 
 
