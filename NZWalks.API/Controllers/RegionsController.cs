@@ -21,10 +21,10 @@ namespace NZWalks.API.Controllers
         [HttpGet]
         [Route("{id:guid}")]
 
-        public IActionResult GetById([FromRoute]Guid id)
+        public IActionResult GetById([FromRoute] Guid id)
         {
-           // var region = dbContext.Regions.Find(id);
-           //Get Region Domain Model From Database
+            // var region = dbContext.Regions.Find(id);
+            //Get Region Domain Model From Database
             var regionDomain = dbContext.Regions.FirstOrDefault(s => s.Id == id);
             if (regionDomain == null)
             {
@@ -34,10 +34,10 @@ namespace NZWalks.API.Controllers
 
             var regionDTO = new RegionDTO
             {
-                Id=regionDomain.Id,
-                Code=regionDomain.Code,
-                Name=regionDomain.Name,
-                RegionNameUrl=regionDomain.RegionNameUrl,
+                Id = regionDomain.Id,
+                Code = regionDomain.Code,
+                Name = regionDomain.Name,
+                RegionNameUrl = regionDomain.RegionNameUrl,
             };
             //return DTO back to Client
             return Ok(regionDTO);
@@ -49,7 +49,7 @@ namespace NZWalks.API.Controllers
         public IActionResult GetAll()
         {
             //Get data From database - Domain models
-            var regionsDomain=dbContext.Regions.ToList();
+            var regionsDomain = dbContext.Regions.ToList();
 
             //map Domain models to DTOs
             var regionDTO = new List<RegionDTO>();
@@ -115,14 +115,68 @@ namespace NZWalks.API.Controllers
             //map model back to DTO
             var regionDto = new RegionDTO
             {
-                Id=regionDomainModel.Id,
-                Code= regionDomainModel.Code,
-                Name=regionDomainModel.Name,
-                RegionNameUrl=regionDomainModel.RegionNameUrl
+                Id = regionDomainModel.Id,
+                Code = regionDomainModel.Code,
+                Name = regionDomainModel.Name,
+                RegionNameUrl = regionDomainModel.RegionNameUrl
             };
-            return CreatedAtAction(nameof(GetById), new {id= regionDto.Id},regionDto);
+            return CreatedAtAction(nameof(GetById), new { id = regionDto.Id }, regionDto);
         }
 
+        [HttpPut]
+        [Route("{id:Guid}")]
+        public IActionResult Update([FromRoute] Guid id, [FromBody] UpdateRegionRequestDto updateRegionRequestDto)
+        {
+            var regionDomainModel = dbContext.Regions.FirstOrDefault(x => x.Id == id);
+            if (regionDomainModel == null)
+            {
+                return NotFound();
+            }
 
+
+            //Map to DTO from model
+            regionDomainModel.Code = updateRegionRequestDto.Code;
+            regionDomainModel.Name = updateRegionRequestDto.Name;
+            regionDomainModel.RegionNameUrl = updateRegionRequestDto.RegionNameUrl;
+
+            dbContext.SaveChanges();
+
+            //convert Domain model to DTO
+
+            var regionDto = new RegionDTO
+            {
+                Id = regionDomainModel.Id,
+                Code = regionDomainModel.Code,
+                Name = regionDomainModel.Name,
+                RegionNameUrl = regionDomainModel.RegionNameUrl
+            };
+
+            return Ok(regionDto);
+        }
+
+        [HttpDelete]
+        [Route("{id:Guid}")]
+        public IActionResult Delete([FromRoute]Guid id)
+        {
+            var regionDomainModel=dbContext.Regions.FirstOrDefault(x=>x.Id==id);
+            if (regionDomainModel == null)
+            {
+                return NotFound();
+            }
+            //Delete Region
+            dbContext.Regions.Remove(regionDomainModel);
+            dbContext.SaveChanges();
+
+            var regionDto = new RegionDTO
+            {
+                Id = regionDomainModel.Id,
+                Code = regionDomainModel.Code,
+                Name = regionDomainModel.Name,
+                RegionNameUrl = regionDomainModel.RegionNameUrl
+            };
+
+
+            return Ok(regionDto);
+        }
     }
 }
